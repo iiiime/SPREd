@@ -217,7 +217,7 @@ def gen_input(expr, idx, n_features, weights):
 	mask[tf_idx, :] = 1
 	np.fill_diagonal(mask, 0)
 	m *= mask
-	m[tf_idx, :] = apply_correction(_M[tf_idx, :], method='rcw')
+	m[tf_idx, :] = apply_correction(m[tf_idx, :], method='rcw')
 	np.fill_diagonal(m, 0)
 
 	
