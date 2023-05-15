@@ -11,7 +11,6 @@ import time
 import os
 import sys
 import glob
-import shutil
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr, spearmanr, entropy

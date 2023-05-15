@@ -210,11 +210,13 @@ def gen_input(expr, idx, n_features):
 	mi = mi_score(x, args.n_bins)
 	
 	for i in range(args.n_features):
-		out.append(cov[i])
-		out.append(spearman[i])
-		out.append(pearson[i])
-		out.append(pm[i])
-		out.append(mi[i])
+		samples = []
+		samples.append(cov[i])
+		samples.append(spearman[i])
+		samples.append(pearson[i])
+		samples.append(pm[i])
+		samples.append(mi[i])
+		out.append(samples)
 	#print(np.array(out).shape)
 	return out
 
@@ -258,13 +260,14 @@ def main():
 				if idx < n_features + args.n_mrs:
 					continue
 				out = gen_input(expr, idx, n_features)
-				hist.append(out)
+				hist.extend(out)
 				#print(idx)
 
 		end = time.time()
 		print("time elapsed:")
 		print(end - start)
 
+	label = [i for s in label for i in s]
 	if not os.path.exists(args.save):
 		os.mkdir(args.save)
 	np.save(args.save + 'hist%d' % args.file_id, hist)

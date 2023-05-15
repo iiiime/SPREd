@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 
 idx_tfg = 100
@@ -43,10 +42,11 @@ class Network(nn.Module):
 
 
 	def forward(self, x):
-		out_tf = x[:,:,:, idx_tf].unsqueeze(-1)
+		out_tf = x[:,:,:, idx_tf]
 		out_tfg = x[:,:,:, idx_tfg].unsqueeze(-1)
+		out_tf = self.conv_tf(out_tf)
 		out_tf = out_tf.view(out_tf.size(0), -1)
-		out_tf = F.dropout(out_tf, p=0.3, training=self.training)
+		out_tfg = self.conv_tfg(out_tfg)
 		out_tfg = out_tfg.view(out_tfg.size(0), -1)
 		out = torch.cat((out_tf, out_tfg), 1)
 
