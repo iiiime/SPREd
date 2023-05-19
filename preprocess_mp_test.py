@@ -68,62 +68,58 @@ def gen_input(tf_id, tfs, gene_names, genes, gene_pairs, save):
 	return res, labels
 
 
-
 def gen_input_1(tf_id, tfs, gene_names, genes, gene_pairs, save):
-	n_genes = len(tf_id) + 1
-	upper_idx = np.triu_indices(n_genes)
-	res = []
-	labels = []
-	c = 0
-	for n, g in enumerate(gene_names):
-		print(g)
-		if g not in np.array(gene_pairs):
-			continue
-		out = []
-		if g not in tf_id:
-			e = [] # expression matrix with 261 tfs
-			l = []
+    n_genes = len(tf_id) + 1
+    upper_idx = np.triu_indices(n_genes)
+    res = []
+    labels = []
+    c = 0
+    for n, g in enumerate(gene_names):
+        print(g)
+        if g not in np.array(gene_pairs):
+            continue
+        out = []
+        if g not in tf_id:
+            e = [] # expression matrix with 261 tfs
+            l = []
 
-			for tf in tf_id:
-				e.append(tfs[tf])
-				l.append(1 if (g, tf) in gene_pairs or (tf, g) in gene_pairs else 0)
-			if l.count(1) == 0:
-				print('error')
-				continue
-			e.append(genes[g])
-			e = np.array(e)
-			#np.savetxt(save + '/expr%d.txt' % c, e, delimiter='\t')
-			#np.savetxt(save + '/label%d.txt' % c, l, delimiter='\t')
+            for tf in tf_id:
+                e.append(tfs[tf])
+                l.append(1 if (g, tf) in gene_pairs or (tf, g) in gene_pairs else 0)
+            if l.count(1) == 0:
+                print('error')
+                continue
+            e.append(genes[g])
+            e = np.array(e)
+            #np.savetxt(save + '/expr%d.txt' % c, e, delimiter='\t')
+            #np.savetxt(save + '/label%d.txt' % c, l, delimiter='\t')
 
-			expr = e.T
-			mask = np.any(expr < 0, axis=0)
-			if np.any(mask):
-				expr[:, mask] -= (np.min(expr[:, mask], axis=0) - 1e-2)
-			mask = np.asarray([(len(np.unique(expr[:, i])) > 1) for i in range(expr.shape[1])], dtype=bool)
-			expr[:, mask] = PowerTransformer(method='box-cox', standardize=True).fit_transform(expr[:, mask] + epsilon)
-			# z norm
-			scaler = StandardScaler(copy=False, with_mean=True, with_std=True)
-			expr = scaler.fit_transform(expr)
-			e = expr.T
-			
-			cov = np.cov(e)
-			spearman = spearmanr(e, axis=1)[0]
-			pearson = np.corrcoef(e)
-			pm = np.linalg.inv(np.array(cov) + 0.001 * np.identity(n_genes))
-			mi = mi_score(e, 6)
+            expr = e.T
+            mask = np.any(expr < 0, axis=0)
+            if np.any(mask):
+                expr[:, mask] -= (np.min(expr[:, mask], axis=0) - 1e-2)
+            mask = np.asarray([(len(np.unique(expr[:, i])) > 1) for i in range(expr.shape[1])], dtype=bool)
+            expr[:, mask] = PowerTransformer(method='box-cox', standardize=True).fit_transform(expr[:, mask] + epsilon)
+            # z norm
+            scaler = StandardScaler(copy=False, with_mean=True, with_std=True)
+            expr = scaler.fit_transform(expr)
+            e = expr.T
+            
+            cov = np.cov(e)
+            spearman = spearmanr(e, axis=1)[0]
+            pearson = np.corrcoef(e)
+            pm = np.linalg.inv(np.array(cov) + 0.001 * np.identity(n_genes))
+            mi = mi_score(e, 6)
 
-			for i in range(len(tf_id)):
-				samples = []
-				samples.append(cov[i])
-				samples.append(spearman[i])
-				samples.append(pearson[i])
-				samples.append(pm[i])
-				samples.append(mi[i])
-				res.append(samples)
-			labels.append(l)
-			labels = [i for s in labels for i in s]
-			#print(l)
-			c += 1
-	return res, labels
-
-
+            for i in range(len(tf_id)):
+                samples = []
+                samples.append(cov[i])
+                samples.append(spearman[i])
+                samples.append(pearson[i])
+                samples.append(pm[i])
+                samples.append(mi[i])
+                res.append(samples)
+            labels.extend(l)
+            #print(l)
+            c += 1
+    return res, labels
