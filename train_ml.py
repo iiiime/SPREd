@@ -13,21 +13,21 @@ import sklearn.metrics
 import matplotlib.pyplot as plt
 
 import utils
-from model_4 import Network
+from model_ml import Network
 from torch.autograd import Variable
 
-n_features = 1
+n_features = 100
 n_bins = 8
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser("regression")
 	parser.add_argument('--batch_size', type=int, default=32)
-	parser.add_argument('--learning_rate', type=float, default=2e-4)
+	parser.add_argument('--learning_rate', type=float, default=0.0002)
 	parser.add_argument('--momentum', type=float, default=0.9)
 	parser.add_argument('--weight_decay', type=float, default=5e-4)
 	parser.add_argument('--gpu', type=int, default=0)
-	parser.add_argument('--epochs', type=int, default=300)
+	parser.add_argument('--epochs', type=int, default=200)
 	parser.add_argument('--in_channels', type=int, default=256)
 	parser.add_argument('--hidden_unit', type=int, default=128)
 	parser.add_argument('--split', type=float, default=0.8)
@@ -36,7 +36,6 @@ if __name__ == '__main__':
 	parser.add_argument('--pos_weight', type=int, default=9)
 	parser.add_argument('--reg_l', type=float, default=0.05, help='coefficient of l2 regularization')
 	parser.add_argument('--dropout', type=float, default=0.3, help='dropout coefficient')
-	parser.add_argument('--feature', type=int, default=0, help='feature for ablation test')
 
 	args = parser.parse_args()
 	args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -49,22 +48,23 @@ if __name__ == '__main__':
 	logging.getLogger().addHandler(fh)
 
 
-class RegressionDataset(torch.utils.data.Dataset):
+class Dataset(torch.utils.data.Dataset):
 	def __init__(self):
 		data = []
 		labels = []
 		for i in range(1,6):
 			data.append(torch.from_numpy(np.load('./hist%d.npy' % i)).type(torch.FloatTensor))
 			labels.append(torch.from_numpy(np.loadtxt('./label%d.csv' % i, delimiter=',', dtype=np.float32)))
-		data = torch.cat((data), 0)
-		self.data = data[:,torch.arange(data.size(1))!=args.feature, :].unsqueeze(1)
-		self.labels = torch.cat((labels), 0).unsqueeze(-1)
+		self.data = torch.cat((data), 0).unsqueeze(1)
+		self.labels = torch.cat((labels), 0)
 
 	def __len__(self):
 		return self.labels.shape[0]
 
 	def __getitem__(self, idx):
 		return self.data[idx], self.labels[idx]
+
+
 
 
 
@@ -82,7 +82,7 @@ def pl_train_curve(train, valid, train_label, valid_label, y_label, n):
 	fig = plt.figure()
 	epoch = np.arange(len(train))
 	if len(train) < 100:
-		epoch *= 10 # set const
+		epoch *= 20 # set const
 	plt.plot(epoch, train, label=train_label)
 	plt.plot(epoch, valid, label=valid_label)
 	plt.xlabel('epochs')
@@ -106,15 +106,17 @@ def main(args):
 	logging.info('args = %s', args)
 
 	#in_channels = int(n_features + n_features * (n_features + 1) / 2)
-	threshold = 0.5
+	#in_channels = 65 # for sub dataset
+	#in_channels = 5148 # conv=5,4
 	in_channels = 5151
+	#in_channels = 5144
 	model = Network(in_channels, args.hidden_unit, n_features, args.dropout).cuda()
 
 	pos_weight = torch.FloatTensor([args.pos_weight]*n_features)
 	criterion = nn.BCEWithLogitsLoss(pos_weight= pos_weight).cuda()
 	optimizer = torch.optim.Adam(model.parameters(), args.learning_rate, weight_decay=args.weight_decay)
 
-	data = RegressionDataset()
+	data = Dataset()
 	num_train = len(data)
 	indices = list(range(num_train))
 	split = int(np.floor(args.split * num_train))
@@ -135,9 +137,8 @@ def main(args):
 	_valid_auprc = []
 	valid_auroc = 0
 	valid_auprc = 0
-	for epoch in range(1, args.epochs + 1):
+	for epoch in range(args.epochs):
 		model.train()
-		tp, tn, fp, fn = 0, 0, 0, 0
 		train_loss = 0
 		train_overall = 0
 		valid_loss = 0
@@ -154,41 +155,26 @@ def main(args):
 			output = model(x)
 
 			loss = criterion(output, y)
+
+			# adding L1 norm
+			#l1_lambda = 0.0001
+			#l1_norm = sum(p.abs().sum() for p in model.parameters())
+			#loss = loss + l1_lambda * l1_norm
+
 			loss.backward() # calculate gradient
 			optimizer.step() # update params
-
-			output = torch.sigmoid(output).detach().cpu()
-			y = y.detach().cpu()
-
-			binaryOutputs = torch.where(output >= threshold, torch.tensor(1.), torch.tensor(0.))
-			tp += ((binaryOutputs == 1) & (y == 1)).sum().item()
-			tn += ((binaryOutputs == 0) & (y == 0)).sum().item()
-			fp += ((binaryOutputs == 1) & (y == 0)).sum().item()
-			fn += ((binaryOutputs == 0) & (y == 1)).sum().item()
 
 			train_loss += float(loss)
 			train_overall += 1
 
-			# global aupr auroc calculation
-			if epoch % 10 == 0:
-				predict.extend(torch.flatten(output))
-				label.extend(torch.flatten(y))
+			# TODO: add function to concat and calculate roc and prc
+			if epoch % 20 == 0 or epoch == args.epochs - 1:
+				concat_predict = torch.flatten(output).detach().cpu()
+				concat_label = torch.flatten(y).detach().cpu()
+				predict = np.concatenate((predict, concat_predict))
+				label = np.concatenate((label, concat_label))
 
-		if epoch % 1 == 0:
-			acc = 100 * (tp + tn) / (tp + tn + fp + fn)
-			recall = 100 * tp / (tp + fn)
-			train_loss /= train_overall
-			_train_loss.append(train_loss)
-			_train_acc.append(acc)
-			print('epoch %03d - training loss %f' % (epoch, train_loss))
-			print('epoch %03d - training acc %f' % (epoch, acc))
-			print('epoch %03d - training recall %f' % (epoch, recall))
-			logging.info('epoch %d', epoch)
-			logging.info('train_loss %f', train_loss)
-			logging.info('train_acc %f', acc)
-			logging.info('train_recall %f', recall)
-
-		if epoch % 10 == 0:
+		if epoch % 20 == 0 or epoch == args.epochs - 1:
 			fpr, tpr, thresholds = sklearn.metrics.roc_curve(label, predict, pos_label=1)
 			pl(fpr, tpr, 'fpr', 'tpr', os.path.join(args.save, 'train_roc_epoch_%d' % epoch))
 			print('train auroc')
@@ -203,12 +189,24 @@ def main(args):
 			_train_auprc.append(train_auprc)
 			logging.info('train_auprc %f', train_auprc)
 
+			#TODO: include prc plot
+			
+
+		#print(train_loss)
+		#print(train_overall)
+		train_loss /= train_overall
+		_train_loss.append(train_loss)
+		print('epoch %03d - training loss %f' % (epoch, train_loss))
+		logging.info('epoch %d', epoch)
+		logging.info('train_loss %f', train_loss)
+		train_acc = utils.acc(train_queue, model)
+		logging.info('train_acc %f', train_acc)
+		_train_acc.append(train_acc)
 
 		#test
 		predict = []
 		label = []
 		model.eval()
-		testtp, testtn, testfp, testfn = 0, 0, 0, 0
 		with torch.no_grad():
 			for x, y in valid_queue:
 				x = Variable(x).cuda()
@@ -216,36 +214,28 @@ def main(args):
 
 				output = model(x).cuda()
 				loss = criterion(output, y)
+				#if epoch == args.epochs-1:
+					#loss = criterion(output, y)
+				if epoch % 20 == 0 or epoch == args.epochs-1:
+					#print(output.shape)
+					concat_predict = torch.flatten(output).cpu()
+					concat_label = torch.flatten(y).cpu()
+					#print(concat_label.shape)
+					predict = np.concatenate((predict, concat_predict))
+					label = np.concatenate((label, concat_label))
+					#print(np.array(label).shape)
+					#print(concat_label.shape)
+					
+					#print('prediction is: ', output)
+					#print('label is: ', y)
 
-				output = torch.sigmoid(output).cpu()
-				y = y.cpu()
+					#print(concat_label)
+					#print(concat_predict)
+					#print(np.array(label).shape)
 
 				valid_loss += float(loss)
 				valid_overall += 1
-
-				binaryOutputs = torch.where(output >= threshold, torch.tensor(1.), torch.tensor(0.))
-				testtp += ((binaryOutputs == 1) & (y == 1)).sum().item()
-				testtn += ((binaryOutputs == 0) & (y == 0)).sum().item()
-				testfp += ((binaryOutputs == 1) & (y == 0)).sum().item()
-				testfn += ((binaryOutputs == 0) & (y == 1)).sum().item()
-
-				if epoch % 10 == 0:
-					predict.extend(torch.flatten(output))
-					label.extend(torch.flatten(y))
-
-			if epoch % 1 == 0:
-				accuracy = 100 * (testtp + testtn) / (testtp + testtn + testfp + testfn)
-				recall = 100 * testtp / (testtp + testfn)
-				valid_loss /= valid_overall
-				_valid_loss.append(valid_loss)
-				_valid_acc.append(accuracy)
-				print('epoch %03d - validation loss %f' % (epoch, valid_loss))
-				logging.info('valid_loss %f', valid_loss)
-				logging.info('valid_acc %f', accuracy)
-				logging.info('valid_recall %f', recall)
-
-
-			if epoch % 10 == 0:
+			if epoch % 20 == 0 or epoch == args.epochs - 1:
 				fpr, tpr, thresholds = sklearn.metrics.roc_curve(label, predict, pos_label=1)
 				valid_auprc = sklearn.metrics.average_precision_score(label, predict, pos_label=1)
 				pl(fpr, tpr, 'fpr', 'tpr', os.path.join(args.save, 'valid roc_%d' % epoch))
@@ -259,7 +249,17 @@ def main(args):
 				_valid_auprc.append(valid_auprc)
 				logging.info('valid_auprc %f', valid_auprc)
 
-		if epoch % 20 == 0:
+			valid_loss /= valid_overall
+			_valid_loss.append(valid_loss)
+			print('epoch %03d - validation loss %f' % (epoch, valid_loss))
+			logging.info('valid_loss %f', valid_loss)
+			valid_acc = utils.acc(valid_queue, model)
+			logging.info('valid_acc %f', valid_acc)
+			_valid_acc.append(valid_acc)
+			#np.savetxt('predict.csv', predict, delimiter=",")
+			#np.savetxt('labels.csv', label, delimiter=",")
+
+		if epoch % 50 == 0:
 			print('saving model ...')
 			state = {
 				'weights': model,

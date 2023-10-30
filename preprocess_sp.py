@@ -19,8 +19,6 @@ from sklearn.preprocessing import PowerTransformer, StandardScaler
 from pandas import DataFrame as df
 from SERGIO.sergio import sergio
 
-# TODO: interaction file has redundent ,,, at the end of lines
-# generate nn input from existing SERGIO expression matrix
 
 
 parser = argparse.ArgumentParser()
@@ -43,12 +41,6 @@ n_features = args.n_features
 mr = np.arange(args.n_mrs)
 
 
-"""
-def shannon_entropy(x):
-	norm = x / float(np.sum(x))
-	norm = norm[np.nonzero(norm)]
-	return -sum(norm * np.log2(norm))
-"""
 
 
 def _mi_score(x, y, n_bins):
@@ -58,7 +50,7 @@ def _mi_score(x, y, n_bins):
 	return H_X + H_Y - H_XY
 
 
-def mi_score(x, n_bins=6): # x: matrix like
+def mi_score(x, n_bins=6):
 	n = x.shape[0]
 	out = np.zeros((n, n))
 	for i in range(n):
@@ -73,9 +65,6 @@ def gen_edge():
 	res = []
 	n_reg = np.arange(3, 8) # number of regulators for each gene
 	prob_d = [0.1, 0.15, 0.5, 0.15, 0.1] # probability distribution of the number of regulators
-	#prob_d = [0.25, 0.5, 0.25]
-	# master regulator ids: 0-9 -> 0-39 -> 0-4
-	# TF ids: 10-109 -> 40 ->139 -> 
 	for i in range(args.n_features):
 		res.append(random.sample(range(args.n_mrs), 3))
 	for i in range(args.n_features, args.n_features+args.n_genes):
@@ -144,7 +133,6 @@ def gen_target(fname):
 	return res, label
 
 
-#TODO: set number_sc and average over columns
 def gen_expr(interaction, regs):
 	"""generate single-cell expression matrix using SERGIO"""
 	sim = sergio(number_genes=200, number_bins=args.n_cond, number_sc=1, noise_params=1, decays=0.8, sampling_state=15, noise_type='dpd')
@@ -184,10 +172,6 @@ def gen_input(expr, idx, n_features):
 	list
 		list of correlation
 	"""
-	#TODO: also try log normalization
-	#r = [[-3., 3.], [-3., 3.]] # range of the histogram
-	#r = [[-2.5, 2.5], [-2.5, 2.5]]
-	#bins = [[-3., -1.1, -0.7, -0.3, 0, 0.3, 0.7, 1.1, 3.], [-3., -1.1, -0.7, -0.3, 0, 0.3, 0.7, 1.1, 3.]]
 	out = []
 	cov = []
 	spearman = []
@@ -217,18 +201,16 @@ def gen_input(expr, idx, n_features):
 		samples.append(pm[i])
 		samples.append(mi[i])
 		out.append(samples)
-	#print(np.array(out).shape)
 	return out
 
 
 #main
 def main():
-	# dataset file direction from previous SERGIO simulations
+	# dataset file from SERGIO simulations
 	epsilon = 1e-50
 	hist = []
 	label = [] # need reshape
 	cov = []
-	#corr = []
 	n_genes = args.n_mrs + args.n_features + args.n_genes # total number of genes
 	for n in range(args.file_id * args.n_samples, args.file_id * args.n_samples + args.n_samples):
 		start = time.time()
@@ -239,7 +221,6 @@ def main():
 
 		fname = path + 'bipartite_GRN.csv'
 		inter, l = gen_target(fname)
-		#print(np.array(l.reshape(-1, 199)))
 		label.append(l)
 		inter = path + 'Interaction_cID_%d.txt' % n
 		regs = path + 'Regs_cID_%d.txt' % n
@@ -261,7 +242,6 @@ def main():
 					continue
 				out = gen_input(expr, idx, n_features)
 				hist.extend(out)
-				#print(idx)
 
 		end = time.time()
 		print("time elapsed:")

@@ -78,17 +78,10 @@ def acc(loader, model):
 		x, y = data
 		x = Variable(x, requires_grad=True).cuda()
 		y = Variable(y).cuda()
-		#print('label is: %f', y)
-		#print(y.shape)
 		output = model(x)
 		output = torch.round(torch.sigmoid(output))
-		#print('output is: %f', output)
-		#print(output.shape)
-		#_, predict = torch.max(output.data, dim=1)
-		#rint(predict.shape)
 		batch = y.size(0) * y.size(1)
-		total += batch # batch
-		#correct += (output == y).sum()
+		total += batch
 		
 		output = output.detach().cpu().numpy()
 		y = y.detach().cpu().numpy()
@@ -99,12 +92,6 @@ def acc(loader, model):
 		count_neg = batch - np.count_nonzero(pos_list)
 		correct += (count_neg/9 + (count - count_neg))
 		
-		"""
-		for i in range(y.size(0)):
-			for j in range(y.size(1)):
-				if y[i][j] == output[i][j]:
-					correct += 1/9 if y[i][j] == 0 else 1
-		"""
 		
 	correct *= 5.
 
@@ -130,8 +117,6 @@ def main(args):
 	logging.info('args = %s', args)
 
 
-	#in_channels = int(n_features + n_features * (n_features + 1) / 2)
-	#in_channels = 5151
 	model = torch.load(args.saved_weights)['weights']
 
 	pos_weight = torch.FloatTensor([args.pos_weight]*n_features)
@@ -170,9 +155,6 @@ def main(args):
 			label = torch.flatten(y).cpu()
 			idx = torch.randperm(n_features)
 
-			#label = label[idx] # negative control
-
-
 
 			fpr, tpr, _ = sklearn.metrics.roc_curve(label, predict, pos_label=1)
 			roc.append(sklearn.metrics.auc(fpr, tpr))
@@ -207,8 +189,6 @@ def main(args):
 		np.save(os.path.join(args.save, 'prc'), prc)
 		logging.info('roc %f', np.mean(roc))
 		logging.info('prc %f', np.mean(prc))
-
-
 
 
 
