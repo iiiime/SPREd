@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import shutil
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 from torch.autograd import Variable
 
 
@@ -29,7 +30,6 @@ def accuracy(output, target, topk=(1,)):
   print(maxk)
   print(batch_size)
 
-  # reduce dimension to 1
   _, pred = output.topk(1, dim = 1, largest = True, sorted = True)
   pred = pred.t()
   correct = pred.eq(target.view(1, -1).expand_as(pred))
@@ -132,47 +132,41 @@ def acc(loader, model):
     x, y = data
     x = Variable(x, requires_grad=True).cuda()
     y = Variable(y).cuda()
-    #print('label is: %f', y)
-    #print(y.shape)
     output = model(x)
     output = torch.round(torch.sigmoid(output))
-    #print('output is: %f', output)
-    #print(output.shape)
-    #_, predict = torch.max(output.data, dim=1)
-    #rint(predict.shape)
     batch = y.size(0) * y.size(1)
-    total += batch # batch
-    #correct += (output == y).sum()
+    total += batch
     
     output = output.detach().cpu().numpy()
     y = y.detach().cpu().numpy()
-    #print('prediction and label')
-    #print(output)
-    #print(y)
-    n_pos = np.count_nonzero(y) # the number of pos label
-    #print('n pos')
-    #print(n_pos)
-    xor_list = np.logical_xor(output, y) # false (0) is the correct prediction
-    #print('xor_list')
-    #print(xor_list)
-    count = batch - np.count_nonzero(xor_list) # the number of correct predictions
-    #print('count')
-    #print(count)
+    n_pos = np.count_nonzero(y)
+    xor_list = np.logical_xor(output, y)
+    count = batch - np.count_nonzero(xor_list)
     and_list = np.logical_and(output, y)
-    #print('and_list')
-    #print(and_list)
-    pos_list = np.logical_or(xor_list, and_list) # false is the correct prediction of neg label
-    #print('pos_list')
-    #print(pos_list)
+    pos_list = np.logical_or(xor_list, and_list)
     count_neg = batch - np.count_nonzero(pos_list)
-    #print('count_neg')
-    #print(count_neg)
     correct += (count_neg/(batch - n_pos) + (count - count_neg)/n_pos)
     
-    """
-    for i in range(y.size(0)):
-      for j in range(y.size(1)):
-        if y[i][j] == output[i][j]:
-          correct += 1/9 if y[i][j] == 0 else 1"""  
   correct *= (batch/2)
   return 100 * correct / total
+
+
+def pl(x, y, x_label, y_label, n):
+  fig = plt.figure()
+  plt.plot(x, y)
+  plt.xlabel(x_label)
+  plt.ylabel(y_label)
+  plt.savefig(n)
+
+
+def pl_train_curve(train, valid, train_label, valid_label, y_label, n):
+  fig = plt.figure()
+  epoch = np.arange(len(train))
+  if len(train) < 100:
+    epoch *= 10
+  plt.plot(epoch, train, label=train_label)
+  plt.plot(epoch, valid, label=valid_label)
+  plt.xlabel('epochs')
+  plt.ylabel(y_label)
+  plt.legend()
+  plt.savefig(os.path.join(args.save, n))
