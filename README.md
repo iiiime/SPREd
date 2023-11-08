@@ -19,7 +19,7 @@ SPREd
 
 ## Overview
 
-The inputs to the SPREd model comprise expression relationships (correlation, mutual information, precision score) between the target gene and each candidate TF and between each pair of TFs. The output is one (**SPREd-SP**) or a vector of (**SPREd-ML**) boolean label, indicating whether the candidate TF regulates the target gene. Training such a neural network model requires a large number of training samples in the form of expresssion matrices and their underlying GRNs. For this, we use the GRN-based expression data simulator, SERGIO, that uses a biophysics-inspired stochastic differential equation to simulate a gene's expression dynamics under linear as well as non-linear influence of its regulator TFs, as prescribed by a GRN. We use SERGIO to generate thousands of training samples for SPREd, including a variety of GRNs and the corresponding expression profiles, resulting in a trained model that can predict the GRN for any given expression matrix.
+The inputs to the **SPREd** model comprise expression relationships (correlation, mutual information, precision score) between the target gene and each candidate TF and between each pair of TFs. The output is one (**SPREd-SP**) or a vector of (**SPREd-ML**) boolean label, indicating whether the candidate TF regulates the target gene. Training such a neural network model requires a large number of training samples in the form of expresssion matrices and their underlying GRNs. For this, we use the GRN-based expression data simulator, SERGIO, that uses a biophysics-inspired stochastic differential equation to simulate a gene's expression dynamics under linear as well as non-linear influence of its regulator TFs, as prescribed by a GRN. We use SERGIO to generate thousands of training samples for SPREd, including a variety of GRNs and the corresponding expression profiles, resulting in a trained model that can predict the GRN for any given expression matrix.
 
 
 ## Installation
@@ -27,14 +27,12 @@ The inputs to the SPREd model comprise expression relationships (correlation, mu
 To download SPREd, clone the repository locally by the following command.
 ```
 git clone git@github.com:iiiime/SPREd.git
-
 cd SPREd
 ```
 
 [Conda](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) is recommended for environment setup and dependencies installation.
 ```
 conda env create -f environment.yml
-
 conda activate spred
 ```
 
@@ -44,7 +42,7 @@ SPREd provides several sample datasets under [SPREd/tests](SPREd/tests).
 
 ### Quick Start
 
-The easist way to get started is to evaluate our pretrained SPREd models. The sample input of SPREd is
+The easist way to get started is to evaluate our pretrained SPREd models. The sample input of SPREd-SP is a preprocessed matrix with dimension of (n, 5, n_tfs+1), where n is the number of TF-gene pairs, and 5 is the different relationships between the Tf and target gene computed from the expression matrix. The output is a vector of predicted edges of the TF and the target gene. Similarly, the input of the SPREd-ML model is a (n, 5, C(n_tfs+1, 2)) matrix, and the output is a list of boolean vector for each gene with every TF.
 
 ### Pretrained models
 
