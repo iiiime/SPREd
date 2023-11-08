@@ -20,7 +20,6 @@ from pandas import DataFrame as df
 from SERGIO.sergio import sergio
 
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--file_id', type=int, default=0, help='file id of hist, cov, and label')
 parser.add_argument('--save', type=str, default='./dataset/data/', help='directory to save input files for neural network')
@@ -31,7 +30,6 @@ parser.add_argument('--n_samples', type=int, default=10, help='number of data po
 parser.add_argument('--n_mrs', type=int, default=5, help='number of master regulators')
 parser.add_argument('--n_features', type=int, default=100, help='number of tfs')
 parser.add_argument('--n_genes', type=int, default=100, help='number of target genes')
-parser.add_argument('--dropout', type=float, default=0, help='probability of dropout')
 
 args = parser.parse_args()
 

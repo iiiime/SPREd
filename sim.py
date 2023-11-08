@@ -18,7 +18,7 @@ from SERGIO.sergio import sergio
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--file_id', type=int, default=0, help='file id of hist, cov, and label')
-parser.add_argument('--data_dir', type=str, default='./dataset/', help='directory of SERGIO input files and simulated data files')
+parser.add_argument('--data_dir', type=str, default='./dataset/data', help='directory of SERGIO input files and simulated data files')
 parser.add_argument('--n_cond', type=int, default=50, help='number of conditions in expression matrix; number of cells in SERGIO simulations')
 parser.add_argument('--n_bins', type=int, default=8, help='bin number of 2d histograms')
 parser.add_argument('--n_samples', type=int, default=10, help='number of data points per dataset for nn models')
