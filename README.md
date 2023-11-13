@@ -63,7 +63,7 @@ The pretrained model outputs the predicted GRN, which is then compared and evalu
 
 ### Train new models
 
-However, the current pretrained SPREd model implemented in `model.py` works only when applied to data with the exact same number of TFs. To train a new model and save the weight of the model, we need to generate the synthetic dataset with the same number of TFs and possibly the same number of conditions. This process might take up to 24 hours to simulate the sufficient amount of data including 30k target genes from different 300 GRNs. In future updates, we will optimize the SPREd workflow by replacing SERGIO with its 2.0 version, which is 100x faster than v1.0.
+However, the current pretrained SPREd model implemented in `model.py` works only when applied to data with the exact same number of TFs. To train a new model and save the weight of the model, we need to generate the synthetic dataset with the same number of TFs and possibly the same number of conditions. This process might take up to 24 hours to simulate the sufficient amount of data including 30k target genes from different 300 GRNs. In future updates, we will optimize the SPREd workflow by replacing SERGIO with its [2.0](https://github.com/PayamDiba/SERGIO/tree/v2) version, which is 100x faster than v1.0.
 
 
 ### Data generation
