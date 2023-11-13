@@ -146,7 +146,7 @@ which takes the processed expression matrix and the model weights from training 
 
 **SERGIO**
 
-We provide several preprocessed datasets of the default setting simulate by SERGIO in folder [SPREd/data](SPREd/data/SERGIO). These datasets can be used for training and testing SPREd model and reproduce the main results in our manuscripts.
+We provide several preprocessed datasets of the default setting simulate by SERGIO in folder [SPREd/dataset](SPREd/dataset) and [SPREd/tests](SPREd/tests). These datasets can be used for training and testing SPREd model and reproduce the main results in our manuscripts.
 
 
 **MERLIN-P**
