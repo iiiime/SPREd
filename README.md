@@ -124,7 +124,7 @@ The training is usually completed within 50 epochs.
 
 **Training options**
 
--   `batch_size`: int (default: `32`). The number of batch size
+-   `batch_size`: int (default: `32`). The number of training samples in one pass.
 -   `learning_rate`: float (default: `2e-4`). Learning rate of [Adam optimizer](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html).
 -   `weight_decay`: float (default: `5e-4`). Weight decay of [Adam optimizer](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html).
 -   `hidden_unit`: int (default: `128`). The number of hidden units in fully connected layer.
