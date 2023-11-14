@@ -13,7 +13,7 @@ import sklearn.metrics
 import matplotlib.pyplot as plt
 
 import utils
-from model_sp import Network
+from model_ import Network
 from torch.autograd import Variable
 
 n_features = 1

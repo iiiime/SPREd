@@ -15,7 +15,7 @@ import random
 
 
 import utils
-from model_ import Network
+from model_ml import Network
 from torch.autograd import Variable
 
 n_features = 100
