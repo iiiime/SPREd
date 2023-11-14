@@ -50,7 +50,7 @@ To begin with, run the test scripts with the provided preprocessed synthetic exp
 
 **SPREd-SP**
 ```
-python test.py --saved_weights './tests/model_weights_sp.pth' --data './tests/hist_sp.npy' --label './tests/label_sp.csv' --n_tf 100
+python ./sp/test.py --saved_weights './tests/model_weights_sp.pth' --data './tests/hist_sp.npy' --label './tests/label_sp.csv' --n_tf 100
 ```
 
 **SPREd-ML**
