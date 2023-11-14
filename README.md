@@ -55,7 +55,7 @@ python ./sp/test.py --saved_weights './tests/model_weights_sp.pth' --data './tes
 
 **SPREd-ML**
 ```
-python test.py --saved_weights './tests/model_weights_ml.pth' --data './tests/hist_ml.npy' --label './tests/label_ml.csv'
+python ./ml/test.py --saved_weights './tests/model_weights_ml.pth' --data './tests/hist_ml.npy' --label './tests/label_ml.csv'
 ```
 
 The pretrained model outputs the predicted GRN, which is then compared and evaluated with the real GRN.
@@ -117,7 +117,7 @@ to prepare the inputs for the SPREd-SP model.
 After generating and formatting the synthetic data for training SPREd model, run
 
 ```
-python train.py --data './dataset/hist.npy' --labels './dataset/label.csv'
+python ./sp/train.py --data './dataset/hist.npy' --labels './dataset/label.csv'
 ```
 
 The training is usually completed within 50 epochs.
