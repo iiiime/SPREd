@@ -13,11 +13,8 @@ import sklearn.metrics
 import matplotlib.pyplot as plt
 
 import utils
-from model_ import Network
+from model import Network
 from torch.autograd import Variable
-
-n_features = 1
-n_bins = 8
 
 
 if __name__ == '__main__':
@@ -28,14 +25,13 @@ if __name__ == '__main__':
 	parser.add_argument('--weight_decay', type=float, default=5e-4)
 	parser.add_argument('--gpu', type=int, default=0)
 	parser.add_argument('--epochs', type=int, default=300)
-	parser.add_argument('--in_channels', type=int, default=256)
 	parser.add_argument('--hidden_unit', type=int, default=128)
 	parser.add_argument('--split', type=float, default=0.8)
 	parser.add_argument('--seed', type=int, default=0)
 	parser.add_argument('--save', type=str, default='EXP', help='experiment name')
 	parser.add_argument('--pos_weight', type=int, default=9)
-	parser.add_argument('--reg_l', type=float, default=0.05, help='coefficient of l2 regularization')
-	parser.add_argument('--dropout', type=float, default=0.3, help='dropout coefficient')
+	parser.add_argument('--dropout', type=float, default=0.3, help='dropout coefficient of hidden units')
+	parser.add_argument('--n_features', type=int, default=100, help='the number of tfs')
 
 	args = parser.parse_args()
 	args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -80,7 +76,7 @@ def pl_train_curve(train, valid, train_label, valid_label, y_label, n):
 	fig = plt.figure()
 	epoch = np.arange(len(train))
 	if len(train) < 100:
-		epoch *= 10 # set const
+		epoch *= 10
 	plt.plot(epoch, train, label=train_label)
 	plt.plot(epoch, valid, label=valid_label)
 	plt.xlabel('epochs')
@@ -103,12 +99,10 @@ def main(args):
 	logging.info('gpu device = %d' % args.gpu)
 	logging.info('args = %s', args)
 
-	#in_channels = int(n_features + n_features * (n_features + 1) / 2)
 	threshold = 0.5
-	in_channels = 5151
-	model = Network(in_channels, args.hidden_unit, n_features, args.dropout).cuda()
+	model = Network(args.hidden_unit, args.n_features, args.dropout).cuda()
 
-	pos_weight = torch.FloatTensor([args.pos_weight]*n_features)
+	pos_weight = torch.FloatTensor([args.pos_weight]*1)
 	criterion = nn.BCEWithLogitsLoss(pos_weight= pos_weight).cuda()
 	optimizer = torch.optim.Adam(model.parameters(), args.learning_rate, weight_decay=args.weight_decay)
 
@@ -152,8 +146,8 @@ def main(args):
 			output = model(x)
 
 			loss = criterion(output, y)
-			loss.backward() # calculate gradient
-			optimizer.step() # update params
+			loss.backward()
+			optimizer.step()
 
 			output = torch.sigmoid(output).detach().cpu()
 			y = y.detach().cpu()
@@ -167,7 +161,6 @@ def main(args):
 			train_loss += float(loss)
 			train_overall += 1
 
-			# global aupr auroc calculation
 			if epoch % 10 == 0:
 				predict.extend(torch.flatten(output))
 				label.extend(torch.flatten(y))

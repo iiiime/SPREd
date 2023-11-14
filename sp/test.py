@@ -13,7 +13,7 @@ import sklearn.metrics
 import matplotlib.pyplot as plt
 import random
 import utils
-from model_ import Network
+from model import Network
 from torch.autograd import Variable
 
 
