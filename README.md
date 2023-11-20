@@ -58,7 +58,7 @@ python ./sp/test.py --saved_weights './tests/model_weights_sp.pth' --data './tes
 python ./ml/test.py --saved_weights './tests/model_weights_ml.pth' --data './tests/hist_ml.npy' --label './tests/label_ml.csv'
 ```
 
-The pretrained model outputs the predicted GRN, which is then compared and evaluated with the real GRN as in the SERGIO input network in the [dataset](SPREd/dataset/data/De-noised_205G_100T_1cPerT_DS0).
+The pretrained model outputs the predicted GRN, which is then compared and evaluated with the real GRN as in the SERGIO input network in the [dataset](/dataset/data/De-noised_205G_100T_1cPerT_DS0).
 
 
 ### Train new models
@@ -146,7 +146,7 @@ which takes the processed expression matrix and the model weights from training 
 
 **SERGIO**
 
-We provide several preprocessed datasets of the default setting simulate by SERGIO in folder [SPREd/dataset](SPREd/dataset) and [SPREd/tests](SPREd/tests). These datasets can be used for training and testing SPREd model and reproduce the main results in our manuscripts.
+We provide several preprocessed datasets of the default setting simulate by SERGIO in folder [SPREd/dataset](/dataset) and [SPREd/tests](/tests). These datasets can be used for training and testing SPREd model and reproduce the main results in our manuscripts.
 
 
 **MERLIN-P**
