@@ -16,8 +16,6 @@ import utils
 from model_ import Network
 from torch.autograd import Variable
 
-n_bins = 8
-
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser("regression")
