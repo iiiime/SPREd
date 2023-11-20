@@ -36,6 +36,8 @@ if __name__ == '__main__':
 	parser.add_argument('--pos_weight', type=int, default=9)
 	parser.add_argument('--reg_l', type=float, default=0.05, help='coefficient of l2 regularization')
 	parser.add_argument('--dropout', type=float, default=0.3, help='dropout coefficient')
+	parser.add_argument('--data', type=str, default='./hist0.npy', help='data')
+	parser.add_argument('--label', type=str, default='./label0.csv', help='labels')
 
 	args = parser.parse_args()
 	args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -50,13 +52,9 @@ if __name__ == '__main__':
 
 class Dataset(torch.utils.data.Dataset):
 	def __init__(self):
-		data = []
-		labels = []
-		for i in range(1,6):
-			data.append(torch.from_numpy(np.load('./hist%d.npy' % i)).type(torch.FloatTensor))
-			labels.append(torch.from_numpy(np.loadtxt('./label%d.csv' % i, delimiter=',', dtype=np.float32)))
-		self.data = torch.cat((data), 0).unsqueeze(1)
-		self.labels = torch.cat((labels), 0)
+		data = torch.from_numpy(np.load(args.data)).type(torch.FloatTensor)
+		self.data = data.unsqueeze(1)
+		self.labels = torch.from_numpy(np.loadtxt(args.label, delimiter=",", dtype=np.float32)).unsqueeze(-1)
 
 	def __len__(self):
 		return self.labels.shape[0]
