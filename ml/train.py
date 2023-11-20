@@ -16,7 +16,6 @@ import utils
 from model_ import Network
 from torch.autograd import Variable
 
-n_features = 100
 n_bins = 8
 
 
@@ -36,6 +35,7 @@ if __name__ == '__main__':
 	parser.add_argument('--pos_weight', type=int, default=9)
 	parser.add_argument('--reg_l', type=float, default=0.05, help='coefficient of l2 regularization')
 	parser.add_argument('--dropout', type=float, default=0.3, help='dropout coefficient')
+	parser.add_argument('--n_features', type=int, default=100, help='the number of TFs')
 	parser.add_argument('--data', type=str, default='./hist0.npy', help='data')
 	parser.add_argument('--label', type=str, default='./label0.csv', help='labels')
 
@@ -100,14 +100,10 @@ def main(args):
 	logging.info('gpu device = %d' % args.gpu)
 	logging.info('args = %s', args)
 
-	#in_channels = int(n_features + n_features * (n_features + 1) / 2)
-	#in_channels = 65 # for sub dataset
-	#in_channels = 5148 # conv=5,4
-	in_channels = 5151
-	#in_channels = 5144
-	model = Network(in_channels, args.hidden_unit, n_features, args.dropout).cuda()
+	in_channels = int(args.n_features + args.n_features * (args.n_features + 1) / 2)
+	model = Network(in_channels, args.hidden_unit, args.n_features, args.dropout).cuda()
 
-	pos_weight = torch.FloatTensor([args.pos_weight]*n_features)
+	pos_weight = torch.FloatTensor([args.pos_weight]*args.n_features)
 	criterion = nn.BCEWithLogitsLoss(pos_weight= pos_weight).cuda()
 	optimizer = torch.optim.Adam(model.parameters(), args.learning_rate, weight_decay=args.weight_decay)
 
