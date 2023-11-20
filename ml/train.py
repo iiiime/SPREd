@@ -75,7 +75,7 @@ def pl_train_curve(train, valid, train_label, valid_label, y_label, n):
 	fig = plt.figure()
 	epoch = np.arange(len(train))
 	if len(train) < 100:
-		epoch *= 20 # set const
+		epoch *= 20
 	plt.plot(epoch, train, label=train_label)
 	plt.plot(epoch, valid, label=valid_label)
 	plt.xlabel('epochs')
@@ -145,18 +145,12 @@ def main(args):
 
 			loss = criterion(output, y)
 
-			# adding L1 norm
-			#l1_lambda = 0.0001
-			#l1_norm = sum(p.abs().sum() for p in model.parameters())
-			#loss = loss + l1_lambda * l1_norm
-
-			loss.backward() # calculate gradient
-			optimizer.step() # update params
+			loss.backward()
+			optimizer.step()
 
 			train_loss += float(loss)
 			train_overall += 1
 
-			# TODO: add function to concat and calculate roc and prc
 			if epoch % 20 == 0 or epoch == args.epochs - 1:
 				concat_predict = torch.flatten(output).detach().cpu()
 				concat_label = torch.flatten(y).detach().cpu()
@@ -178,11 +172,7 @@ def main(args):
 			_train_auprc.append(train_auprc)
 			logging.info('train_auprc %f', train_auprc)
 
-			#TODO: include prc plot
 			
-
-		#print(train_loss)
-		#print(train_overall)
 		train_loss /= train_overall
 		_train_loss.append(train_loss)
 		print('epoch %03d - training loss %f' % (epoch, train_loss))
@@ -203,24 +193,11 @@ def main(args):
 
 				output = model(x).cuda()
 				loss = criterion(output, y)
-				#if epoch == args.epochs-1:
-					#loss = criterion(output, y)
 				if epoch % 20 == 0 or epoch == args.epochs-1:
-					#print(output.shape)
 					concat_predict = torch.flatten(output).cpu()
 					concat_label = torch.flatten(y).cpu()
-					#print(concat_label.shape)
 					predict = np.concatenate((predict, concat_predict))
 					label = np.concatenate((label, concat_label))
-					#print(np.array(label).shape)
-					#print(concat_label.shape)
-					
-					#print('prediction is: ', output)
-					#print('label is: ', y)
-
-					#print(concat_label)
-					#print(concat_predict)
-					#print(np.array(label).shape)
 
 				valid_loss += float(loss)
 				valid_overall += 1
@@ -245,8 +222,6 @@ def main(args):
 			valid_acc = utils.acc(valid_queue, model)
 			logging.info('valid_acc %f', valid_acc)
 			_valid_acc.append(valid_acc)
-			#np.savetxt('predict.csv', predict, delimiter=",")
-			#np.savetxt('labels.csv', label, delimiter=",")
 
 		if epoch % 50 == 0:
 			print('saving model ...')
