@@ -43,6 +43,8 @@ if __name__ == '__main__':
 	parser.add_argument('--reg_l', type=float, default=0.05, help='coefficient of l2 regularization')
 	parser.add_argument('--saved_weights', type=str, default='./model_weights_150.pth')
 	parser.add_argument('--is_plot', type=bool, default=False, help='if to plot auroc and auprc or not')
+	parser.add_argument('--data', type=str, default='./hist0.npy', help='data')
+	parser.add_argument('--label', type=str, default='./label0.csv', help='labels')
 
 	args = parser.parse_args()
 	args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
@@ -57,11 +59,9 @@ if __name__ == '__main__':
 
 class RegressionDataset(torch.utils.data.Dataset):
 	def __init__(self):
-		data = torch.from_numpy(np.load('./hist0.npy')).type(torch.FloatTensor)
-		#idx = random.sample(range(5000), 5)
-		#self.data = torch.flatten(data, 1, 2).unsqueeze(1)
+		data = torch.from_numpy(np.load(args.data)).type(torch.FloatTensor)
 		self.data = data.unsqueeze(1)
-		self.labels = torch.from_numpy(np.loadtxt('./label0.csv', delimiter=",", dtype=np.float32))
+		self.labels = torch.from_numpy(np.loadtxt(args.label, delimiter=",", dtype=np.float32))
 
 	def __len__(self):
 		return self.labels.shape[0]
