@@ -38,7 +38,7 @@ conda activate spred
 
 ## Example usage
 
-SPREd provides several sample datasets under [SPREd/tests](SPREd/tests).
+SPREd provides several sample datasets under [SPREd/tests](/tests).
 
 ### Quick Start
 
