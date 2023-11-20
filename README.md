@@ -58,7 +58,7 @@ python ./sp/test.py --saved_weights './tests/model_weights_sp.pth' --data './tes
 python ./ml/test.py --saved_weights './tests/model_weights_ml.pth' --data './tests/hist_ml.npy' --label './tests/label_ml.csv'
 ```
 
-The pretrained model outputs the predicted GRN, which is then compared and evaluated with the real GRN.
+The pretrained model outputs the predicted GRN, which is then compared and evaluated with the real GRN as in the SERGIO input network in the [dataset](SPREd/dataset/data/De-noised_205G_100T_1cPerT_DS0).
 
 
 ### Train new models
