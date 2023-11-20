@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	parser.add_argument('--saved_weights', type=str, default='./model_weights.pth')
 	parser.add_argument('--is_plot', type=bool, default=False, help='if to plot auroc and auprc or not')
 	parser.add_argument('--n_tf', type=int, default=100)
-	parser.add_argument('--data', type=str, default='./hist0.npy', help='data')
+	parser.add_argument('--data', type=str, default='./dataset/hist0.npy', help='data')
 
 	args = parser.parse_args()
 	args.save = 'eval-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
