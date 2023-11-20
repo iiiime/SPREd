@@ -109,7 +109,7 @@ to prepare the inputs for the SPREd-SP model.
 
 - `file_id`: int (default: `0`). The file ids to enumerate multiple datasets.
 - `data_dir`: int (default: `'./dataset/data/'`). The directory of SERGIO simulated data files.
-- `data_dir`: int (default: `'./dataset/`). The directory of preprocessed input data for SPREd model.
+- `save`: int (default: `'./dataset/`). The directory of preprocessed input data for SPREd model.
 
 
 ### Train and run SPREd model
