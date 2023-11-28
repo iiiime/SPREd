@@ -108,8 +108,14 @@ to prepare the inputs for the SPREd-SP model.
 **Data preprocessing options**
 
 - `file_id`: int (default: `0`). The file ids to enumerate multiple datasets.
-- `data_dir`: int (default: `'./dataset/data/'`). The directory of SERGIO simulated data files.
-- `save`: int (default: `'./dataset/`). The directory of preprocessed input data for SPREd model.
+- `save`: str (default: `'./dataset/`). The directory of preprocessed input data for SPREd model.
+- `data_dir`: str (default: `'./dataset/data/'`). The directory of SERGIO simulated data files.
+- `n_cond`: int (default:`50`). The number of conditions in epxression matrix.
+- `n_bins`: int (default:`6`). The number of bins of histograms.
+- `n_samples`: int (default:`10`). The number of training or testing samples.
+- `n_mrs`: int (default:`5`). The number of master regulators. Should be the same as the provided dataset.
+- `n_features`: int (default:`100`). The number of TFs. Should be the same as teh provided dataset.
+- `n_genes`: int (default:`100`). The number of target genes. Should be the same as teh provided dataset.
 
 
 ### Train and run SPREd model
