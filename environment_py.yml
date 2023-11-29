@@ -1,4 +1,4 @@
-name: py3
+name: spred
 channels:
   - pytorch
   - plotly
